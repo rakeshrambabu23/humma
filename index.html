@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium AR Restaurant Menu</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  
+  <style>
+    /* Global Reset & Variables */
+    :root {
+      --primary: #FF5A5F;
+      --primary-hover: #E0484D;
+      --bg-color: #F7F7F8;
+      --card-bg: #FFFFFF;
+      --text-main: #222222;
+      --text-muted: #717171;
+      --font-heading: 'Playfair Display', serif;
+      --font-body: 'Outfit', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      font-family: var(--font-body); 
+      background-color: var(--bg-color); 
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Main Container */
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    /* Centered Header / Logo */
+    header {
+      text-align: center;
+      padding: 30px 0 20px;
+    }
+    
+    .logo {
+      font-family: var(--font-heading);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo span { color: var(--text-main); }
+
+    /* Promotional Banner */
+    .banner {
+      width: 100%;
+      height: 200px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop') center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(255, 90, 95, 0.15);
+    }
+
+    .banner h2 {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .banner p { font-size: 16px; font-weight: 300; }
+
+    /* Sticky Filters */
+    .filters-container {
+      position: sticky;
+      top: 0;
+      background-color: rgba(247, 247, 248, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 0;
+      z-index: 100;
+      margin-bottom: 20px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    
+    .filters::-webkit-scrollbar { display: none; }
+    
+    .filter-btn {
+      padding: 10px 24px;
+      border: 1px solid #EBEBEB;
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .filter-btn:hover { border-color: var(--text-muted); }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(255, 90, 95, 0.3);
+    }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+
+    /* Individual Food Card */
+    .food-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #F0F0F0;
+    }
+
+    .food-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+
+    /* Model Viewer inside Card */
+    model-viewer {
+      width: 100%;
+      height: 250px;
+      background-color: #F8F9FA;
+      outline: none;
+      border-bottom: 1px solid #F0F0F0;
+    }
+
+    /* AR Button (Slotted inside model-viewer) */
+    .ar-button {
+      background-color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+      color: var(--text-main);
+      border-radius: 30px;
+      border: 1px solid #EBEBEB;
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .ar-button:hover { background-color: #fff; transform: scale(1.05); }
+
+    /* Card Details */
+    .card-details { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .item-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .item-price {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .item-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 15px;
+      flex-grow: 1;
+    }
+
+    /* Order Button */
+    .order-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--text-main);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .order-btn:hover { background-color: var(--primary); }
+
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <header>
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+        <span>Lumina</span> Eatery
+      </div>
+    </header>
+
+    <div class="banner">
+      <h2>Experience Food in 3D</h2>
+      <p>Tap "View in AR" to see dishes on your table before you order.</p>
+    </div>
+
+    <div class="filters-container">
+      <div class="filters" id="filter-container">
+        <button class="filter-btn active" data-category="all">All Items</button>
+        <button class="filter-btn" data-category="starters">Starters</button>
+        <button class="filter-btn" data-category="mains">Main Course</button>
+        <button class="filter-btn" data-category="desserts">Desserts</button>
+      </div>
+    </div>
+
+    <div class="menu-grid" id="menu-grid">
+      </div>
+
+  </div>
+
+  <script>
+    // Expanded Database of Food Items
+    const menuData = [
+      {
+        id: 1,
+        category: 'starters',
+        name: 'Fresh Hass Avocado',
+        price: '$6.99',
+        desc: 'Locally sourced fresh avocado, perfect for starting your meal with healthy fats and rich flavor.',
+        src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb'
+      },
+      {
+        id: 2,
+        category: 'mains',
+        name: 'Classic Cheeseburger',
+        price: '$14.99',
+        desc: 'Juicy 100% beef patty with melted cheddar, crisp lettuce, and our secret sauce on a brioche bun.',
+        // Using a placeholder box model. Replace with your actual Burger .glb
+        src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb' 
+      },
+      {
+        id: 3,
+        category: 'mains',
+        name: 'Margherita Pizza',
+        price: '$18.50',
+        desc: 'Wood-fired crust topped with San Marzano tomato sauce, fresh mozzarella, and basil leaves.',
+        // Using a placeholder box model. Replace with your actual Pizza .glb
+        src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb'
+      },
+      {
+        id: 4,
+        category: 'desserts',
+        name: 'Vanilla Macaron',
+        price: '$5.00',
+        desc: 'Delicate French macaron filled with rich Madagascar vanilla bean buttercream.',
+        // Placeholder for dessert
+        src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb'
+      }
+    ];
+
+    const menuGrid = document.getElementById('menu-grid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    // Function to render the HTML cards dynamically
+    function renderMenu(items) {
+      menuGrid.innerHTML = ''; // Clear current grid
+      
+      items.forEach(item => {
+        const cardHTML = `
+          <div class="food-card">
+            <model-viewer 
+              src="${item.src}" 
+              alt="A 3D model of ${item.name}"
+              ar 
+              ar-modes="webxr scene-viewer quick-look" 
+              camera-controls 
+              auto-rotate
+              shadow-intensity="1">
+              
+              <button slot="ar-button" class="ar-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                View AR
+              </button>
+            </model-viewer>
+
+            <div class="card-details">
+              <div class="card-header">
+                <h3 class="item-title">${item.name}</h3>
+                <span class="item-price">${item.price}</span>
+              </div>
+              <p class="item-desc">${item.desc}</p>
+              <button class="order-btn">Add to Order</button>
+            </div>
+          </div>
+        `;
+        menuGrid.insertAdjacentHTML('beforeend', cardHTML);
+      });
+    }
+
+    // Initial load: Render all items
+    renderMenu(menuData);
+
+    // Filter Logic
+    filterButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        // Update active class
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        // Filter array
+        const category = e.target.getAttribute('data-category');
+        if (category === 'all') {
+          renderMenu(menuData);
+        } else {
+          const filteredItems = menuData.filter(item => item.category === category);
+          renderMenu(filteredItems);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
